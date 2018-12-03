@@ -1,0 +1,45 @@
+{
+  "type": "record",
+  "namespace": "com.xyzcorp",
+  "name": "Order",
+  "fields": [
+    {
+      "type": "int",
+      "name": "total"
+    },
+    {
+      "name": "shipping",
+      "type": {
+        "name": "Shipping",
+        "type": "enum",
+        "symbols": [
+          "NEXT_DAY",
+          "TWO_DAY",
+          "GROUND"
+        ]
+      }
+    },
+    {
+      "type": "string",
+      "name": "state"
+    },
+    {
+      "type": "float",
+      "name": "discount"
+    },
+    {
+      "type": [
+        "null",
+        {
+          "type": "enum",
+          "name": "Gender",
+          "symbols": [
+            "MALE",
+            "FEMALE"
+          ]
+        }
+      ],
+      "name": "gender"
+    }
+  ]
+}
