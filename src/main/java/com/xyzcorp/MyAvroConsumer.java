@@ -36,7 +36,7 @@ public class MyAvroConsumer {
         properties.setProperty("specific.avro.reader", "true");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        KafkaConsumer<String, String> consumer =
+        KafkaConsumer<String, Order> consumer =
                 new KafkaConsumer<>(properties);
         consumer.subscribe(Collections.singletonList("my_avro_orders"),
                 new ConsumerRebalanceListener() {
@@ -61,9 +61,9 @@ public class MyAvroConsumer {
         }));
 
         while (!done.get()) {
-            ConsumerRecords<String, String> records =
+            ConsumerRecords<String, Order> records =
                     consumer.poll(Duration.of(500, ChronoUnit.MILLIS));
-            for (ConsumerRecord<String, String> record : records) {
+            for (ConsumerRecord<String, Order> record : records) {
                 System.out.format("offset: %d\n", record.offset());
                 System.out.format("partition: %d\n", record.partition());
                 System.out.format("timestamp: %d\n", record.timestamp());
