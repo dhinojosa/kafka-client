@@ -23,22 +23,16 @@ public class MyProducer {
                 StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 IntegerSerializer.class);
-        properties.put(ProducerConfig.ACKS_CONFIG,
-                "all");
-        properties.put(ProducerConfig.RETRIES_CONFIG,
-                "10");
-        properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG,
-                "400");
 
         KafkaProducer<String, Integer> producer =
                 new KafkaProducer<>(properties);
 
-        String countryString =
+        String stateString =
                 "AK,AL,AZ,AR,CA,CO,CT,DE,FL,GA," +
                         "HI,ID,IL,IN,IA,KS,KY,LA,ME,MD," +
                         "MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ," +
                         "NM,NY,NC,ND,OH,OK,OR,PA,RI,SC," +
-                        "SD,TN,TX,UT,VT,VA,WA,WV,WI,WY,";
+                        "SD,TN,TX,UT,VT,VA,WA,WV,WI,WY";
 
 
         Random random = new Random();
@@ -50,10 +44,10 @@ public class MyProducer {
         }));
 
         while (!done.get()) {
-            String[] countries = countryString.split(",");
-            int index = random.nextInt(countries.length - 1);
-            String country = countries[index];
-            int amount = random.nextInt(99999) + 1;
+            String[] states = stateString.split(",");
+            int index = random.nextInt(states.length);
+            String country = states[index];
+            int amount = random.nextInt(100000-50+1) + 50;
 
             ProducerRecord<String, Integer> producerRecord =
                     new ProducerRecord<>("my_orders", country, amount);
@@ -71,7 +65,7 @@ public class MyProducer {
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-            Thread.sleep(random.nextInt(30000 - 5000) + 5000);
+            Thread.sleep(random.nextInt(30000 - 5000 + 1) + 5000);
         }
     }
 }
