@@ -27,7 +27,8 @@ public class MyStreams {
         KStream<String, Integer> ca =
                 stream.filter((key, value) -> key.endsWith("CA"));
 
-        ca.peek((s, n) -> System.out.format("Filter msg: %s, %d\n", s, n))
+        ca.peek((s, n) ->
+                System.out.format("Filter msg: %s, %d\n", s, n))
           .to("priority_state_orders");
 
         stream.groupByKey()
