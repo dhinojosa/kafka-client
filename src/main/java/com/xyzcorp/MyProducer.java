@@ -34,8 +34,6 @@ public class MyProducer {
                         "NM,NY,NC,ND,OH,OK,OR,PA,RI,SC," +
                         "SD,TN,TX,UT,VT,VA,WA,WV,WI,WY";
 
-
-        Random random = new Random();
         AtomicBoolean done = new AtomicBoolean(false);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -43,20 +41,22 @@ public class MyProducer {
             producer.close();
         }));
 
+        Random random = new Random();
+
         while (!done.get()) {
             String[] states = stateString.split(",");
-            int index = random.nextInt(states.length);
-            String country = states[index];
-            int amount = random.nextInt(100000-50+1) + 50;
+            String state = states[random.nextInt(states.length)];
+            int amount = random.nextInt(100000 - 50 + 1) + 50;
 
             ProducerRecord<String, Integer> producerRecord =
-                    new ProducerRecord<>("my_orders", country, amount);
+                    new ProducerRecord<>("my_orders", state, amount);
 
             Future<RecordMetadata> future = producer.send(producerRecord);
             try {
                 RecordMetadata metadata = future.get();
                 System.out.format("key: %s\n", producerRecord.key());
-                System.out.format("value: %s\n", producerRecord.value().toString());
+                System.out.format("value: %s\n",
+                        producerRecord.value().toString());
                 System.out.format("offset: %d\n", metadata.offset());
                 System.out.format("partition: %d\n", metadata.partition());
                 System.out.format("timestamp: %d\n", metadata.timestamp());
