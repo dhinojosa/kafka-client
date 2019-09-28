@@ -68,6 +68,16 @@
             <artifactId>kafka-avro-serializer</artifactId>
             <version>${confluent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>0.10.2</version>
+        </dependency>
     </dependencies>
 
     <build>
