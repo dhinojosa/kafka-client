@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class MyConsumer {
 
-    public static String collectionTopicPartitionToString
+    private static String collectionTopicPartitionToString
             (Collection<TopicPartition> topicPartitions) {
         return topicPartitions.stream()
                               .map(tp -> tp.topic() + " - " + tp.partition())
@@ -32,15 +32,18 @@ public class MyConsumer {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.IntegerDeserializer");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
         KafkaConsumer<String, String> consumer =
                 new KafkaConsumer<>(properties);
+
         consumer.subscribe(Collections.singletonList("my_orders"),
                 new ConsumerRebalanceListener() {
                     @Override
                     public void onPartitionsRevoked(Collection<TopicPartition> collection) {
                         System.out.println("Partition revoked:" +
                                 collectionTopicPartitionToString(collection));
+                        consumer.commitAsync();
                     }
 
                     @Override
@@ -52,10 +55,7 @@ public class MyConsumer {
 
         AtomicBoolean done = new AtomicBoolean(false);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            done.set(true);
-            consumer.close();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> done.set(true)));
 
         while (!done.get()) {
             ConsumerRecords<String, String> records =
@@ -70,7 +70,14 @@ public class MyConsumer {
                 System.out.format("key: %s\n", record.key());
                 System.out.format("value: %s\n", record.value());
             }
+
+            consumer.commitAsync((offsets, exception) -> {
+                //offsets
+                //exception
+            });
         }
+        consumer.commitSync(); //Block
+        consumer.close();
     }
 }
 
