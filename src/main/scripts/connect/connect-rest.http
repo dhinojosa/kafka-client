@@ -1,0 +1,122 @@
+
+### Get all the connectors that are available
+
+GET /connectors HTTP/1.1
+Host: localhost:8083
+Accept: application/json
+
+### Get all connector plugins
+GET /connector-plugins HTTP/1.1
+Host: localhost:8083
+Accept: application/json
+
+### Submit a file job
+POST /connectors HTTP/1.1
+Host: localhost:8083
+Content-Type: application/json
+
+{
+  "name": "File-Sink-Connector",
+  "config": {
+    "connector.class": "org.apache.kafka.connect.file.FileStreamSinkConnector",
+    "tasks.max": "1",
+    "topics": "mysql-kafka_order",
+    "value.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter.schema.registry.url": "http://localhost:8081",
+    "file": "/Users/danno/tmp/kafka.orders.sink.txt"
+  }
+}
+
+### See file sink connector properties
+GET /connectors/File-Sink-Connector/status
+Host: localhost:8083
+Content-Type: application/json
+Accept: application/json
+
+
+### Submit a mysql-source
+POST /connectors HTTP/1.1
+Host: localhost:8083
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "jdbc_source_mysql",
+  "config": {
+    "tasks.max": "3",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url" : "http://localhost:8081",
+    "value.converter.schema.registry.url" : "http://localhost:8081",
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://localhost:3306/kafka_orders?useUnicode=true&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC",
+    "connection.user": "kafka_user",
+    "connection.password": "kafka_stuff",
+    "mode": "timestamp+incrementing",
+    "incrementing.column.name": "id",
+    "timestamp.column.name": "updated_date",
+    "topic.prefix": "mysql-",
+    "errors.tolerance": "none",
+    "errors.deadletterqueue.topic.name":"dlq_kafka_orders",
+    "errors.deadletterqueue.topic.replication.factor": 1
+  }
+}
+
+### Submit a mysql-source in JSON
+POST /connectors HTTP/1.1
+Host: localhost:8083
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "jdbc_source_mysql_json",
+  "config": {
+    "tasks.max": "3",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://localhost:3306/kafka_orders?useUnicode=true&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC",
+    "connection.user": "kafka_user",
+    "connection.password": "kafka_stuff",
+    "mode": "timestamp+incrementing",
+    "incrementing.column.name": "id",
+    "timestamp.column.name": "updated_date",
+    "topic.prefix": "mysql-"
+  }
+}
+
+###
+GET /connectors/jdbc_source_mysql/status
+Host: localhost:8083
+Content-Type: application/json
+Accept: application/json
+
+
+### Update the config
+PUT /connectors/jdbc_source_mysql/config HTTP/1.1
+Host: localhost:8083
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "jdbc_source_mysql",
+  "config": {
+    "tasks.max": "1",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://localhost:3306/kafka_orders?useUnicode=true&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC",
+    "connection.user": "kafka_user",
+    "connection.password": "kafka_stuff",
+    "mode": "timestamp+incrementing",
+    "incrementing.column.name": "id",
+    "timestamp.column.name": "updated_date",
+    "topic.prefix": "mysql-"
+  }
+}
+
+
+
+
+
+
