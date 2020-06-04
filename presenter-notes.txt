@@ -1,0 +1,74 @@
+Setup
+----------------------
+1. Download Confluent
+2. Setup Confluent to run local, will need another download to set up local instance
+3. Ensure Java 8
+4. ./confluent local start
+   Starting zookeeper
+   zookeeper is [UP]
+   Starting kafka
+   kafka is [UP]
+   Starting schema-registry
+   schema-registry is [UP]
+   Starting kafka-rest
+   kafka-rest is [UP]
+   Starting connect
+   connect is [UP]
+   Starting ksql-server
+   ksql-server is [UP]
+   Starting control-center
+   control-center is [UP]
+5. Clone https://github.com/dhinojosa/kafka-client
+
+6. Create Topics
+./bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 3 --topic my_orders
+./bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 3 --topic california_state_orders
+./bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 3 --topic state_orders_count
+
+7. Run Producer
+mvn exec:java -Dexec.mainClass="com.xyzcorp.MyProducer"
+
+8. Run Multiple Consumers
+mvn exec:java -Dexec.mainClass="com.xyzcorp.MyConsumer"
+
+9. Run Streams
+mvn exec:java -Dexec.mainClass="com.xyzcorp.MyStreams" 
+
+10. See what is in California
+./bin/kafka-console-consumer \
+--bootstrap-server localhost:9092 \
+  --topic california_state_orders --from-beginning \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.IntegerDeserializer \
+  --property print.key=true \
+  --property key.separator=,
+
+11. State orders Count
+ ./kafka-console-consumer \                                                                                  danno@DannoAir
+--bootstrap-server localhost:9092 \
+  --topic state_orders_count --from-beginning \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.LongDeserializer \
+  --property print.key=true \
+  --property key.separator=,
+
+12. Create Avro Orders
+
+./bin/kafka-topics --create --topic my_avro_orders --partitions 3 --replication-factor 1 --zookeeper localhost:2181
+
+
+13. Run MyAvroProducer
+mvn exec:java -Dexec.mainClass="com.xyzcorp.MyAvroProducer" 
+
+14. Show MyAvroProducer
+ ./bin/kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic my_avro_orders --from-beginning --key-deserializer org.apache.kafka.common.serialization.StringDeserializer --property print.key=true --property key.separator=,
+
+15. Run ksql
+
+16. set 'auto.offset.reset'='earliest';
+
+17. CREATE STREAM my_avro_orders (total BIGINT, shipping VARCHAR, state VARCHAR, discount DOUBLE, gender VARCHAR) WITH (KAFKA_TOPIC='my_avro_orders', VALUE_FORMAT='AVRO');
+
+18. Create table my_shipping_orders with (partitions=2) as select shipping, count(*) from my_avro_orders group by shipping;
+
+19. select * from my_shipping_orders;
