@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 public class MyConsumer {
 
+
     private static String collectionTopicPartitionToString
             (Collection<TopicPartition> topicPartitions) {
         return topicPartitions.stream()

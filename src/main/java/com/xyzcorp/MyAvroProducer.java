@@ -50,10 +50,10 @@ public class MyAvroProducer {
             Gender gender = random.nextBoolean() ? Gender.MALE : Gender.FEMALE;
             float discount = random.nextInt(20) / 100.0f;
 
-            int shippingChoice = random.nextInt(2);
+            Shipping shipping = Shipping.values()[random.nextInt(2)];
 
             Order order = new Order(amount,
-                    Shipping.values()[shippingChoice],
+                    shipping,
                     state, discount, gender);
 
             ProducerRecord<String, Order> producerRecord =
