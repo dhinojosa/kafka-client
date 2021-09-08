@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 public class MyConsumer {
 
-
     private static String collectionTopicPartitionToString
             (Collection<TopicPartition> topicPartitions) {
         return topicPartitions.stream()
@@ -27,7 +26,7 @@ public class MyConsumer {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 "localhost:9092");
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "my_group");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "marketing");
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringDeserializer");
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
