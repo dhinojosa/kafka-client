@@ -44,8 +44,6 @@ public class MyStreams {
 
         KafkaStreams streams = new KafkaStreams(topology, props);
 
-        streams.setUncaughtExceptionHandler((t, e) -> e.printStackTrace());
-
         streams.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
