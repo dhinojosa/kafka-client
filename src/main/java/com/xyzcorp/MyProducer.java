@@ -18,12 +18,22 @@ public class MyProducer {
     @SuppressWarnings("Duplicates")
     public static void main(String[] args) throws InterruptedException {
         Properties properties = new Properties();
+
+        String bootstrapServer = Optional.ofNullable(System.getenv(
+            "BOOTSTRAP_SERVERS")).orElse("localhost:9092");
+
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-            "localhost:9092");
+            bootstrapServer);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
             StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
             IntegerSerializer.class);
+        properties.put(ProducerConfig.RETRIES_CONFIG, 5);
+        properties.put(ProducerConfig.ACKS_CONFIG, "all");
+        properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
+        properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
+
 
         KafkaProducer<String, Integer> producer =
             new KafkaProducer<>(properties);
@@ -51,7 +61,8 @@ public class MyProducer {
             int amount = random.nextInt(100000 - 50 + 1) + 50;
 
             ProducerRecord<String, Integer> producerRecord =
-                new ProducerRecord<>("my_orders", state, amount);
+                new ProducerRecord<>("my-orders", state, amount);
+
 
             //Asynchronous
             producer.send(producerRecord, (metadata, e) -> {

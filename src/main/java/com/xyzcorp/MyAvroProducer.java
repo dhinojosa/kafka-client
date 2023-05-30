@@ -6,6 +6,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -16,13 +17,17 @@ public class MyAvroProducer {
     @SuppressWarnings("Duplicates")
     public static void main(String[] args) throws InterruptedException {
         Properties properties = new Properties();
+        String bootstrapServer = Optional.ofNullable(System.getenv(
+            "BOOTSTRAP_SERVERS")).orElse("localhost:9092");
+        String schemaRegistryURL = Optional.ofNullable(System.getenv(
+            "SCHEMA_REGISTRY_URL")).orElse("http://localhost:8081");
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                "localhost:9092");
+            bootstrapServer);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-        properties.setProperty("schema.registry.url", "http://localhost:8081");
+        properties.setProperty("schema.registry.url", schemaRegistryURL);
 
         KafkaProducer<String, Order> producer =
                 new KafkaProducer<>(properties);
@@ -57,7 +62,7 @@ public class MyAvroProducer {
                     state, discount, gender);
 
             ProducerRecord<String, Order> producerRecord =
-                    new ProducerRecord<>("my_avro_orders", state, order);
+                    new ProducerRecord<>("my-avro-orders", state, order);
 
             Future<RecordMetadata> future = producer.send(producerRecord);
             try {
