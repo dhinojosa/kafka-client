@@ -23,37 +23,43 @@ public class MyStreams {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,
             Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
-            Serdes.Integer().getClass());
+            Serdes.Long().getClass());
 
         StreamsBuilder builder = new StreamsBuilder();
 
         KStream<String, Integer> stream =
-            builder.stream("my_orders"); //Key: State, Value: Amount
+            builder.stream("my_orders", Consumed.with(
+                Serdes.String(), Serdes.Integer())); //Key: State, Value: Amount
 
         //One branch
         stream.filter((key, value) -> key.equals("CA"))
-            .to("california_state_orders");
+            .to("california_state_orders", Produced.with(Serdes.String(), Serdes.Integer()));
 
 
         //Second branch
-        stream.groupByKey()
+        KStream<String, Long> peek = stream.groupByKey()
             .count()
             .toStream()
             .peek((key, value) ->
-                System.out.printf("key: %s, value %d", key, value))
+                System.out.printf("key: %s, value %d", key, value));
+        peek
             .to("state_orders_count",
                 Produced.with(Serdes.String(), Serdes.Long()));
 
         //windowing
         //Third branch
-        stream
+        KStream<Windowed<String>, Long> stream2 = stream
             .groupByKey()
             .windowedBy(TimeWindows.ofSizeAndGrace(Duration.ofMinutes(3), Duration.ofMinutes(2)))
             .aggregate(() -> 0L,
                 (key1, value1, aggregate) -> value1 + aggregate)
-            .toStream()
-            .map((key, value) -> new KeyValue<>(key.window().endTime().toEpochMilli(), value))
-            .to("windowed_time_topic", Produced.with(Serdes.Long(), Serdes.Long()));
+            .toStream();
+
+
+        KStream<Long, Long> map = stream2
+            .map((key, value) -> new KeyValue<>(key.window().endTime().toEpochMilli(), value));
+        map
+           .to("windowed_time_topic", Produced.with(Serdes.Long(), Serdes.Long()));
 
         Topology topology = builder.build();
 
