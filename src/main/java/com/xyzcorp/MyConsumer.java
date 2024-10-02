@@ -40,8 +40,14 @@ public class MyConsumer {
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100);
         properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 200);
         properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-            "org.apache.kafka.clients.consumer.RoundRobinAssignor");
+            "org.apache.kafka.clients.consumer.StickRoundRobinAssignor");
         properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        properties.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 60000); //10 minutes
+        properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "100");
+        properties.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "20");
+        properties.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, "1000");
+
+
 
         KafkaConsumer<String, String> consumer =
             new KafkaConsumer<>(properties);
@@ -90,8 +96,9 @@ public class MyConsumer {
             }
 
             consumer.commitAsync((offsets, exception) -> {
-//                offsets.
-//                exception.
+               if(exception != null) {
+                   //Get information after the commit
+               }
             });
 
             System.out.println(isClosed(consumer));

@@ -8,6 +8,7 @@ import org.apache.kafka.streams.kstream.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Properties;
 
 import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
@@ -35,6 +36,9 @@ public class MyStreams {
         stream.filter((key, value) -> key.equals("CA"))
             .to("california_state_orders", Produced.with(Serdes.String(), Serdes.Integer()));
 
+        stream.peek((key, value) -> System.out.printf("%s:%d", key, value));
+
+        stream.foreach((key, value) -> System.out.printf("%s:%d", key, value));
 
         //Second branch
         KStream<String, Long> peek = stream.groupByKey()

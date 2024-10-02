@@ -28,15 +28,20 @@ public class MyProducer {
             StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
             IntegerSerializer.class);
-        properties.put(ProducerConfig.RETRIES_CONFIG, 5);
+        properties.put(ProducerConfig.RETRIES_CONFIG, 30);
         properties.put(ProducerConfig.ACKS_CONFIG, "all");
         properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
         properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-
-
+        properties.put(ProducerConfig.BATCH_SIZE_CONFIG, 2000);
+        properties.put(ProducerConfig.LINGER_MS_CONFIG, 2000);
+        properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 30000);
+        properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 15000);
+        properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "lz4");
+        properties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 10000);
+        //properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, "com.xyzcorp.MyPartitioner");
 
         KafkaProducer<String, Integer> producer =
-            new KafkaProducer<>(properties);
+            new KafkaProducer<String, Integer>(properties);
 
         String stateString =
             "AK,AL,AZ,AR,CA,CO,CT,DE,FL,GA," +
@@ -61,34 +66,35 @@ public class MyProducer {
             int amount = random.nextInt(100000 - 50 + 1) + 50;
 
             ProducerRecord<String, Integer> producerRecord =
-                new ProducerRecord<>("my-orders", state, amount);
+                new ProducerRecord<String, Integer>("my-orders", state, amount);
 
 
             //Asynchronous
-            producer.send(producerRecord, (metadata, e) -> {
-                if (metadata != null) {
+            producer.send(producerRecord, (metadata, exception) -> {
+                if (exception != null) {
+                    System.out.println("ERROR! ");
+                    String firstException =
+                            Arrays.stream(exception.getStackTrace())
+                                    .findFirst()
+                                    .map(StackTraceElement::toString)
+                                    .orElse("Undefined Exception");
+                    System.out.println(firstException);
+                } else {
+
                     System.out.println(producerRecord.key());
                     System.out.println(producerRecord.value());
 
                     if (metadata.hasOffset()) {
                         System.out.format("offset: %d\n",
-                            metadata.offset());
+                                metadata.offset());
                     }
                     System.out.format("partition: %d\n",
-                        metadata.partition());
+                            metadata.partition());
                     System.out.format("timestamp: %d\n",
-                        metadata.timestamp());
+                            metadata.timestamp());
                     System.out.format("topic: %s\n", metadata.topic());
                     System.out.format("toString: %s\n",
-                        metadata.toString());
-                } else {
-                    System.out.println("ERROR! ");
-                    String firstException =
-                        Arrays.stream(e.getStackTrace())
-                              .findFirst()
-                              .map(StackTraceElement::toString)
-                              .orElse("Undefined Exception");
-                    System.out.println(firstException);
+                            metadata.toString());
                 }
             });
 

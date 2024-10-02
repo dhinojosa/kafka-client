@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kafka.version>3.4.0</kafka.version>
         <avro.version>1.11.1</avro.version>
-        <confluent.version>7.4.0</confluent.version>
+        <confluent.version>7.7.1</confluent.version>
     </properties>
 
     <!--necessary to resolve confluent dependencies-->
